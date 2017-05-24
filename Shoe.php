@@ -9,7 +9,7 @@ include_once 'Cards.php';
 
 class Shoe
 {
-    public $cards = [];
+    private $cards = [];
     private $numDecks;
 
     //initializes empty array of cards and number of decks variable
@@ -55,6 +55,12 @@ class Shoe
         else{
             THROW new \Exception("That card is not in the shoe anymore");
         }
+    }
+
+    public function dealCard()
+    {
+        $card = array_shift($this->cards);
+        return $card;
     }
 //removes a dealt card from the array
     public function getCards()

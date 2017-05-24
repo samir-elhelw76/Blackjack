@@ -4,61 +4,43 @@
 namespace Blackjack;
 
 include_once 'Shoe.php';
-
 include_once 'Cards.php';
+include_once 'Hand.php';
 
 
 class Dealer
 {
     private $handDealer;
-    private $handDealerValue;
+    private $dealerHandValue;
     public $Shoe;
 
 
     public function __construct($numDecks)
     {
         $this->Shoe = new Shoe($numDecks);
-        $this->handDealer = $this->DealHand();
+        $this->handDealer = (new Hand($this->DealHand()));
     }
-
-//    private function shuffleShoe()
-  //  {
-      //  shuffle($this->Shoe->getCards());
-    //}
-    //shuffles the shoe
+//Hand should be incorporated into handDealer variable
 
     public function DealHand()
     {
         $cards = [];
         for ($i = 0; $i < 2; $i++) {
-            $cards[] = $this->DealCard();
+            $cards[] = $this->Shoe->dealCard();
         }
         return $cards;
     }
     //this method returns an array called 'cards' and removes the items in that array from the shoe
 
 
-    public function DealCard()
-    {
-        $card =  array_pop($this->Shoe->getCards());
-        return $card;
-    }
-    //this method deals a single card
 
-    public function dealerBestHand()
-    {
-        if (array_key_exists('A', $this->handDealer)) {
-            $tempHand = new Hand($this->handDealer);
-            if ($tempHand->getHandValue() > 21) {
-                $tempHand['A'] = '1';
-            } elseif ($this->handDealerValue >= 17) {
-                echo 'I am staying';
-            }
 
-            else{
-                echo "I'll hit again";
+    public function getDealerBestHand()
+    {
+        if($this->dealerHandValue<21){
+            while($this->dealerHandValue<17){
+
             }
-            $this->handDealerValue = $tempHand->getHandValue();
         }
     }
     //this method determines whether the dealer will hit again or stay, also contains logic for whether the ace will be treated as a 1 or 11

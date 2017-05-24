@@ -8,6 +8,7 @@
 
 namespace Blackjack;
 include_once 'Cards.php';
+include_once 'Dealer.php';
 
 
 class Hand
@@ -29,7 +30,7 @@ class Hand
     {
         $handValue = 0;
         foreach ($handCards as $card) {
-            $tempCard = new Cards($card[0], $card[1]);
+            $tempCard = new Cards($card[1], $card[0]);
             $handValue = $handValue + $tempCard->getCardValue($card[1]);
         }
 
@@ -38,11 +39,17 @@ class Hand
         //sets the value in the hand equal to sum the value of the cards as they match with the cardValues array in Cards.php
     }
 
+
     public function getHandValue()
     {
         return $this->value;
 
         //getter for the value of a hand
+    }
+
+    public function getHandCards()
+    {
+        return $this->handCards;
     }
 
 }

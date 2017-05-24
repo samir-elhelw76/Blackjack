@@ -51,7 +51,7 @@ class Cards
      */
     public function getCardString()
     {
-        return $this->cardSuit.$this->cardFace;
+        return $this->cardFace.$this->cardSuit;
     }
 
     public static function getFaces(){
