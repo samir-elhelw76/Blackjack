@@ -20,7 +20,7 @@ class Dealer
     {
         $this->Shoe = new Shoe($numDecks);
         $this->shuffleShoe();
-        $this->handDealer = $this->DealHand()
+        $this->handDealer = $this->DealHand();
 
     }
 
