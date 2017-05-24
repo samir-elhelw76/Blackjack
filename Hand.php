@@ -29,9 +29,10 @@ class Hand
     private function setHandValue(array $handCards)
     {
         $handValue = 0;
-        foreach ($handCards as $card) {
-            $tempCard = new Cards($card[1], $card[0]);
-            $handValue = $handValue + $tempCard->getCardValue($card[1]);
+        foreach ($handCards as $val) {
+            $cardTemp = $val -> getCardString();
+            $tempCard = new Cards($cardTemp[1], $cardTemp[0]);
+            $handValue = $handValue + $tempCard->getCardValue($cardTemp[0]);
         }
 
         $this->value = $handValue;
