@@ -3,7 +3,7 @@
 namespace Blackjack;
 
 
-//This class initializes an array of faces and suits and returns and object card based off these values
+//This class initializes an array of faces and suits and returns an object card based off these values
 
 class Cards
 {

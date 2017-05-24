@@ -9,14 +9,19 @@ include_once 'Cards.php';
 
 class Shoe
 {
-    private $cards = [];
+    public $cards = [];
     private $numDecks;
+
+    //initializes empty array of cards and number of decks variable
 
 
     public function __construct($numDecks)
     {
         $this->numDecks = $numDecks;
         $this->fillShoe();
+        $this->shuffleShoe();
+
+        //sets number of decks equal to parameter, constructs the shoe
     }
 
     private function fillShoe()
@@ -36,9 +41,12 @@ class Shoe
         }
         $this->cards = $tempDeck;
     }
+//fills the shoe by using the array suits in cards.php and the array keys of faces in cards.php, then creates a card by matching those values in the class
 
-
-
+    private function shuffleShoe()
+    {
+        shuffle($this->cards);
+    }
 
     public function rmvCard($card){
         if(in_array($card, $this->cards)) {
@@ -48,7 +56,7 @@ class Shoe
             THROW new \Exception("That card is not in the shoe anymore");
         }
     }
-
+//removes a dealt card from the array
     public function getCards()
     {
         return $this->cards;
