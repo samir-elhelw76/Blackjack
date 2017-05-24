@@ -1,2 +1,2 @@
 # Blackjack
-My blackjack application 
+This is Samir's blackjack application.
