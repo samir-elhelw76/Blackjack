@@ -19,6 +19,8 @@ class Dealer
     {
         $this->Shoe = new Shoe($numDecks);
         $this->handDealer = (new Hand($this->DealHand()));
+        $this->dealerHandValue = $this->handDealer->getHandValue();
+
     }
 //Hand should be incorporated into handDealer variable
 
@@ -39,6 +41,8 @@ class Dealer
     {
         if($this->dealerHandValue<21){
             while($this->dealerHandValue<17){
+                $this->handDealer->getHandCards()[] = $this->Shoe->dealCard();
+                $this->dealerHandValue = $this->handDealer->getHandValue();
 
             }
         }

@@ -9,7 +9,6 @@ class Cards
 {
     private $cardFace;
     private $cardSuit;
-    private $card;
 
     private static $faces = [
         '2'=>2,
@@ -32,7 +31,6 @@ class Cards
     public function __construct($suit, $face)
     {
         $this->cardCheck($suit,$face);
-        $this->card = $this->getCardString();
 
     }
 
