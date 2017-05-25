@@ -28,34 +28,25 @@ class Shoe
     {
         $suits = Cards::getSuits();
         $cardValues = array_keys(Cards::getFaces());
-        $tempDeck = [];
+        $this->cards = [];
         for ($i = 0; $i < $this->numDecks; $i++) {
             foreach ($suits as $suit) {
                 foreach ($cardValues as $cardValue) {
                     $tempCard = new Cards($suit, $cardValue);
-                    $tempDeck[] = $tempCard;
+                    $this->cards[] = $tempCard;
 
                 }
             }
 
         }
-        $this->cards = $tempDeck;
     }
 //fills the shoe by using the array suits in cards.php and the array keys of faces in cards.php, then creates a card by matching those values in the class
 
-    private function shuffleShoe()
+    public function shuffleShoe()
     {
         shuffle($this->cards);
     }
 
-    public function rmvCard($card){
-        if(in_array($card, $this->cards)) {
-            array_splice($this->cards, array_search($card, $this->cards));
-        }
-        else{
-            THROW new \Exception("That card is not in the shoe anymore");
-        }
-    }
 
     public function dealCard()
     {

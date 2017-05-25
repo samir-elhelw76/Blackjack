@@ -13,7 +13,6 @@ include_once 'Dealer.php';
 
 class Hand
 {
-    private $value;
     private $handCards;
 
     //initializes a hand value and the cards in that hand
@@ -22,35 +21,45 @@ class Hand
     public function __construct(array $handCards)
     {
         $this->handCards = $handCards;
-        $this->setHandValue($handCards);
-    }
-
-
-    private function setHandValue(array $handCards)
-    {
-        $handValue = 0;
-        foreach ($handCards as $val) {
-            $card= $val -> getCardString();
-            $tempCard = new Cards($card[1], $card[0]);
-            $handValue = $handValue + $tempCard->getCardValue($card[0]);
-        }
-
-        $this->value = $handValue;
-
-        //sets the value in the hand equal to sum the value of the cards as they match with the cardValues array in Cards.php
     }
 
 
     public function getHandValue()
     {
-        return $this->value;
+        $handValue = 0;
+        foreach ($this->handCards as $card) {
+            $handValue += $card->getCardValue();
+        }
 
-        //getter for the value of a hand
+        return $handValue;
+        //sets the value in the hand equal to sum the value of the cards as they match with the cardValues array in Cards.php
     }
+
 
     public function getHandCards()
     {
         return $this->handCards;
     }
+
+    public function getCard($card)
+    {
+        return $this->handCards[] = $card;
+
+    }
+
+    public function ifAce(Hand $hand)
+    {
+        if (array_key_exists('A', $hand->getHandCards())) {
+            if ($hand->getHandValue() > 21) {
+                $hand['A'] = 1;
+            } else {
+                throw new \Exception("This card is not an Ace");
+            }
+
+
+        }
+
+    }
+
 
 }

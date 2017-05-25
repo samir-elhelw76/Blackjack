@@ -10,19 +10,18 @@ include_once 'Hand.php';
 
 class Dealer
 {
-    private $handDealer;
-    private $dealerHandValue;
+    private $dealerHand;
     public $Shoe;
 
 
     public function __construct($numDecks)
     {
         $this->Shoe = new Shoe($numDecks);
-        $this->handDealer = (new Hand($this->DealHand()));
-        $this->dealerHandValue = $this->handDealer->getHandValue();
+        $this->dealerHand = new Hand($this->DealHand());
+        $this->DealerBestHand();
 
     }
-//Hand should be incorporated into handDealer variable
+//Hand should be incorporated into dealerHand variable
 
     public function DealHand()
     {
@@ -37,20 +36,28 @@ class Dealer
 
 
 
-    public function getDealerBestHand()
-    {
-        if($this->dealerHandValue<21){
-            while($this->dealerHandValue<17){
-                $this->handDealer->getHandCards()[] = $this->Shoe->dealCard();
-                $this->dealerHandValue = $this->handDealer->getHandValue();
 
-            }
+    private function DealerBestHand()
+    {
+        if($this->dealerHand->getHandValue() == 21){
+            echo 'I win! Better luck next time.';
+        }
+        elseif ($this->dealerHand->getHandValue()<17){
+            $this->Hit($this->dealerHand);
+
         }
     }
-    //this method determines whether the dealer will hit again or stay, also contains logic for whether the ace will be treated as a 1 or 11
+    //determines whether or not the dealer wants to hit
+
+    public function Hit(Hand $hand)
+    {
+        $hand->getCard($this->Shoe->dealCard());
+    }
+    //a method that adds another card to the player's hand
+
 
     public function getDealerHand()
     {
-        return $this->handDealer;
+        return $this->dealerHand;
     }
 }

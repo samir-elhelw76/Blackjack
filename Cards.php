@@ -35,7 +35,7 @@ class Cards
     }
 
     private function cardCheck($suit, $face){
-        if(in_array($face, self::$faces) && in_array($suit, self::$suits) || array_key_exists($face, self::$faces)){
+        if(in_array($suit, self::$suits) && array_key_exists($face, self::$faces)){
             $this->cardFace = $face;
             $this->cardSuit = $suit;
         }
@@ -60,8 +60,8 @@ class Cards
         return self::$suits;
     }
 
-    public function getCardValue($face){
-        return self::$faces[$face];
+    public function getCardValue(){
+        return self::$faces[$this->cardFace];
     }
 
 
