@@ -8,7 +8,6 @@
 
 namespace Blackjack;
 include_once 'Cards.php';
-include_once 'Dealer.php';
 
 
 class Hand
@@ -21,6 +20,7 @@ class Hand
     public function __construct(array $handCards)
     {
         $this->handCards = $handCards;
+
     }
 
 
@@ -47,19 +47,6 @@ class Hand
 
     }
 
-    public function ifAce(Hand $hand)
-    {
-        if (array_key_exists('A', $hand->getHandCards())) {
-            if ($hand->getHandValue() > 21) {
-                $hand['A'] = 1;
-            } else {
-                throw new \Exception("This card is not an Ace");
-            }
-
-
-        }
-
-    }
-
 
 }
+
