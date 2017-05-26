@@ -5,7 +5,7 @@ namespace Blackjack;
 
 //This class initializes an array of faces and suits and returns an object card based off these values
 
-class Cards
+class Card
 {
     private $cardFace;
     private $cardSuit;
@@ -30,11 +30,11 @@ class Cards
 
     public function __construct($suit, $face)
     {
-        $this->cardCheck($suit,$face);
+        $this->setCard($suit,$face);
 
     }
 
-    private function cardCheck($suit, $face){
+    private function setCard($suit, $face){
         if(in_array($suit, self::$suits) && array_key_exists($face, self::$faces)){
             $this->cardFace = $face;
             $this->cardSuit = $suit;
@@ -63,6 +63,12 @@ class Cards
     public function getCardValue(){
         return self::$faces[$this->cardFace];
     }
+
+    public function getCardFace()
+    {
+        return $this->cardFace;
+    }
+
 
 
 }

@@ -2,9 +2,10 @@
 
 namespace Blackjack;
 
-include_once 'Dealer.php';
+include_once 'Game.php';
+include_once 'Card.php';
+include_once 'Hand.php';
 
-$newDealer = new Dealer(1);
-print_r($newDealer->getDealerHand());
+$newDealer = new Game(1);
 
 

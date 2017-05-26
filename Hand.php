@@ -7,7 +7,7 @@
  */
 
 namespace Blackjack;
-include_once 'Cards.php';
+include_once 'Card.php';
 
 
 class Hand
@@ -36,6 +36,14 @@ class Hand
     }
 
 
+    public function getHandString()
+    {
+        $strHand = [];
+        foreach($this->handCards as $card) {
+            $strHand [] = $card->getCardString();
+        }
+            return $strHand;
+    }
     public function getHandCards()
     {
         return $this->handCards;
@@ -46,7 +54,6 @@ class Hand
         return $this->handCards[] = $card;
 
     }
-
 
 }
 

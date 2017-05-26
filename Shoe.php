@@ -1,7 +1,7 @@
 <?php
 
 namespace Blackjack;
-include_once 'Cards.php';
+include_once 'Card.php';
 
 
 //This class initializes a shoe based on the number of decks the player chooses to use
@@ -26,13 +26,13 @@ class Shoe
 
     private function fillShoe()
     {
-        $suits = Cards::getSuits();
-        $cardValues = array_keys(Cards::getFaces());
+        $suits = Card::getSuits();
+        $cardValues = array_keys(Card::getFaces());
         $this->cards = [];
         for ($i = 0; $i < $this->numDecks; $i++) {
             foreach ($suits as $suit) {
                 foreach ($cardValues as $cardValue) {
-                    $tempCard = new Cards($suit, $cardValue);
+                    $tempCard = new Card($suit, $cardValue);
                     $this->cards[] = $tempCard;
 
                 }
