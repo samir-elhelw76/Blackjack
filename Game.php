@@ -15,9 +15,10 @@ class Game
     private $gameStatus;
     public $Shoe;
 
-    public function __construct($numDecks)
+    public function __construct()
     {
-        $this->Shoe = new Shoe($numDecks);
+        $responseDecks = (int)$this->message("How many decks would you like in the shoe?: ");
+        $this->Shoe = new Shoe($responseDecks);
         $this->playerHand = new Hand($this->DealHand());
         $this->dealerHand = new Hand($this->DealHand());
         $this->Intro();
@@ -38,7 +39,6 @@ class Game
             echo "Okay maybe next time";
             exit;
         } else {
-            $responseDecks = $this->message("How many decks would you like in the shoe?: ");
 
             echo "\n";
             echo "Game will now begin ...\n" . "\n";
@@ -55,7 +55,7 @@ class Game
             $this->ShowPlayerHand();
             $this->checkHand($this->playerHand);
             echo "The dealer is showing" . " " . $this->handString($this->dealerHand)[0] . " " . "\n";
-            $playerHitResponse = $this->message("Will you hit or stay? Type 'hit' or 'stay: ");
+            $playerHitResponse = $this->message("Will you hit or stay? Type 'hit' or 'stay': ");
             if (strtolower($playerHitResponse) != 'hit') {
                 $this->dealerTurn();
             } elseif (substr(strtolower($playerHitResponse), 0, 1) == 'h') {
