@@ -17,33 +17,38 @@ class Game
 
     public function __construct()
     {
-        $responseDecks = (int)$this->message("How many decks would you like in the shoe?: ");
-        $this->Shoe = new Shoe($responseDecks);
-        $this->playerHand = new Hand($this->DealHand());
-        $this->dealerHand = new Hand($this->DealHand());
-        $this->Intro();
+        if ($this->Intro() == False){
+            exit;
+        }
+        else{
+            $this->Shoe = new Shoe($this->constructShoe());
+            $this->playerHand = new Hand($this->DealHand());
+            $this->dealerHand = new Hand($this->DealHand());
+            $this->dealerShowedCards = [];
+            echo "\n";
+            echo "Game will now begin ...\n" . "\n";
+            $this->gameStatus = True;
+            $this->gameLoop();
+        }
     }
 
 
 
-    private function handString(Hand $hand)
+    private function constructShoe()
     {
-        $handArray = $hand->getHandString();
-        return $handArray;
+        $responseDecks = (int)$this->message("How many decks would you like to play with?");
+        return $responseDecks;
     }
+
 
     private function Intro()
     {
         $responseIntro = $this->message("Would you like to play a game of blackjack? Type 'yes' or 'no':" . " ");
         if (substr(strtolower($responseIntro), 0, 1) != 'y') {
             echo "Okay maybe next time";
-            exit;
+            return False;
         } else {
-
-            echo "\n";
-            echo "Game will now begin ...\n" . "\n";
-            $this->gameStatus = True;
-            $this->gameLoop();
+            return True;
         }
 
     }
@@ -54,7 +59,7 @@ class Game
         while ($this->gameStatus == True) {
             $this->ShowPlayerHand();
             $this->checkHand($this->playerHand);
-            echo "The dealer is showing" . " " . $this->handString($this->dealerHand)[0] . " " . "\n";
+            echo $this->ShowDealerHand(). " " . "\n";
             $playerHitResponse = $this->message("Will you hit or stay? Type 'hit' or 'stay': ");
             if (strtolower($playerHitResponse) != 'hit') {
                 $this->dealerTurn();
@@ -69,7 +74,6 @@ class Game
                 } else {
                     $this->endGame();
                 }
-
             }
         }
     }
@@ -84,7 +88,6 @@ class Game
         } elseif ($hand->getHandValue() < 21) {
             return "Can hit again";
         }
-
     }
 
     private function ShowPlayerHand()
@@ -94,6 +97,22 @@ class Game
             echo " " . $card;
         }
         echo "\n";
+    }
+
+    private function ShowDealerHand()
+    {
+        echo "Dealer is showing";
+        for($i = 1; $i<=count($this->dealerHand->getHandString());$i++ ){
+            echo " ".$this->dealerHand->getHandString()[$i];
+        }
+
+    }
+
+
+    private function handString(Hand $hand)
+    {
+        $handArray = $hand->getHandString();
+        return $handArray;
     }
 
     private function message($message)
@@ -126,16 +145,27 @@ class Game
 
     private function dealerTurn()
     {
-        if ($this->dealerHand->getHandValue() == 21) {
+        if ($this->checkHand($this->dealerHand) == "Blackjack") {
             echo 'I win! Better luck next time.';
-        } elseif ($this->dealerHand->getHandValue() < 17) {
+            $this->endGame();
+        } elseif ($this->checkHand($this->dealerHand) == "Can hit again" && $this->dealerHand->getHandValue()<17) {
             $this->Hit($this->dealerHand);
+            if($this->checkHand($this->dealerHand) == "Bust"){
+                echo "I bust, you win!";
+                $this->endGame();
+            }
+        }
+        elseif($this->checkHand($this->dealerHand) == "Bust"){
+            echo "\n"."I bust, you win!";
+        }
+        else{
+            echo "Your move"."\n";
         }
     }
 
     private function endGame()
     {
-        echo $this->ShowPlayerHand() ."You busted" . "\n";
+        echo $this->ShowPlayerHand() ."Good Game!". "\n";
         echo "See you next time!";
         die();
     }
@@ -151,4 +181,3 @@ class Game
         return $this->playerHand;
     }
 }
-
