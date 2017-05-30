@@ -13,16 +13,35 @@ include_once 'Dealer.php';
 class Player
 {
     private $money;
+    public $playerHand;
+    private $playerName;
 
 
-    public function __construct($numDecks)
+    public function __construct($cards)
     {
+        $this->playerHand = new Hand($cards);
+        $this->money = 300;
     }
 
 
-    private function setPlayerHand()
+   public function getPlayerHand()
+   {
+       return $this->playerHand;
+   }
+
+
+   public function wantHit()
+   {
+       return $this->message( "Would you like to 'hit' or 'stay'?");
+   }
+
+    private function message($message)
     {
+        echo $message;
+        $handle = fopen("php://stdin", "r");
+        $savedHandle = fgets($handle);
+        fclose($handle);
+        $savedHandle = trim($savedHandle);
+        return $savedHandle;
     }
-
-
 }

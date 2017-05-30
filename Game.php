@@ -6,26 +6,22 @@ namespace Blackjack;
 include_once 'Shoe.php';
 include_once 'Card.php';
 include_once 'Hand.php';
+include_once 'Dealer.php';
 
 
 class Game
 {
-    private $playerHand;
     private $gameStatus;
-    public $dealerHand;
-    public $Shoe;
+    public $dealer;
+    public $player;
 
     public function __construct()
     {
         if ($this->Intro() == False) {
             exit;
         } else {
-            $this->Shoe = new Shoe($this->constructShoe());
-            $dealerHandCards = [new Card('D', 'A'), new Card('H', '4')];
-            $this->dealerHand = new Hand($dealerHandCards);
-            $this->playerHand = new Hand($dealerHandCards);
-
-            //$this->dealerHand = new Hand($this->DealHand());
+            $this->dealer = new Dealer($this->constructShoe());
+            $this->player = new Player($this->dealer->DealHand());
             echo "\n";
             echo "Game will now begin ...\n" . "\n";
             $this->gameStatus = True;
@@ -55,63 +51,76 @@ class Game
     }
 
 
-    public function gameLoop()
+    private function gameLoop()
     {
         while ($this->gameStatus == True) {
-            $this->checkHand($this->playerHand);
-            echo "\n" . $this->ShowDealerHand(1) . " " . "\n";
-            $playerHitResponse = $this->message("Will you hit or stay? Type 'hit' or 'stay': ");
-            if (strtolower($playerHitResponse) != 'hit') {
-                $this->dealerTurn();
-            } elseif (substr(strtolower($playerHitResponse), 0, 1) == 'h') {
-                $this->Hit($this->playerHand);
-            }
+            $this->ShowDealerHand(1);
+            $this->playerTurn();
+
+
         }
-        $this->endGame();
+
     }
 
-
-    private function checkHand(Hand $hand)
+    private function playerTurn()
     {
-        if ($hand->getHandValue() >= 21 && !is_array($hand->getHandValue())) {
-            $this->gameStatus = False;
-        } elseif (is_array($hand->getHandValue()) && $hand === $this->dealerHand) {
-            if (max($hand->getHandValue()) > 21 && min($hand->getHandValue()) > 21) {
-                $this->gameStatus = False;
-            } elseif (max($hand->getHandValue()) < 17) {
-                while (max($hand->getHandValue()) < 17) {
-                    $this->Hit($hand);
-                }
-                print_r($hand->getHandValue());
-                die();
-                $this->gameStatus = False;
+
+        if ($this->checkSoftHand($this->player->getPlayerHand()) == True) {
+            echo "Your hand has two values ";
+            foreach ($this->player->getPlayerHand()->getHandValue() as $value) {
+                echo "\n" . $value;
             }
-        } elseif ($hand === $this->dealerHand && $hand->getHandValue() < 17) {
-            $this->Hit($hand);
-        } elseif (is_array($hand->getHandValue()) && $hand === $this->playerHand) {
-            $this->ShowPlayerHand(True);
-        } else {
-            $this->ShowPlayerHand();
+            if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
+                $this->dealer->bestHand();
+            } else {
+                $this->dealer->Hit($this->player->playerHand);
+                $this->checkHandValue($this->player->playerHand, True);
+            }
         }
+
 
     }
 
-    private function ShowPlayerHand($softHand = False)
+
+    private function checkSoftHand(Hand $hand)
+    {
+        if (!is_array($hand->getHandValue())) {
+            return False;
+        } else {
+            return True;
+        }
+    }
+
+
+    private function checkHandValue(Hand $hand, $softHand = False)
+    {
+        if ($softHand != False) {
+            if (max($hand->getHandValue()) > 21 && min($hand->getHandValue() > 21)) {
+                $this->Bust();
+            } elseif (max($hand->getHandValue()) == 21 || min($hand->getHandValue() == 21)) {
+                $this->Blackjack();
+            } else {
+                return null;
+            }
+
+        }
+    }
+
+
+    private function Bust(Hand $hand)
+    {
+        if($hand !== $this->dealer->getDealerHand()){
+            echo "You lost!\n"."The house wins with a hand of\n".print_r($this->dealer->getDealerHand()->getHandString());
+        }
+        else{
+            echo "You win!\n"."Your hand was\n".$this->ShowPlayerHand();
+        }
+    }
+    private function ShowPlayerHand()
     {
         echo "Your hand is";
-        foreach ($this->handString($this->playerHand) as $card) {
+        foreach ($this->handString($this->player->getPlayerHand()) as $card) {
             echo " " . $card;
-        }
-        echo "\n";
-        if ($softHand == True) {
-            echo "Your hand has a value of \n";
-            foreach ($this->playerHand->getHandValue() as $value) {
-                if ($value < 21) {
-                    echo $value . "\n";
-                }
-            }
-        } else {
-            echo "Your current value is " . $this->playerHand->getHandValue() . "\n";
         }
     }
 
@@ -119,25 +128,12 @@ class Game
     private function ShowDealerHand($start)
     {
         echo "\nDealer is showing ";
-        for ($i = $start; $i <= count($this->dealerHand->getHandString()); $i++) {
-            echo " " . $this->dealerHand->getHandString()[$i];
+        for ($i = $start; $i <= count($this->dealer->getDealerHand()->getHandString()); $i++) {
+            echo " " . $this->dealer->getDealerHand()->getHandString()[$i];
         }
 
     }
 
-    private function Bust($hand)
-    {
-        if ($hand == $this->playerHand) {
-            echo "\n You Bust!" . "\n";
-            exit;
-        } else {
-            echo "\n";
-            echo "The dealer has bust\n";
-            print_r($this->dealerHand->getHandString());
-            echo "\nYou Win\n";
-            exit;
-        }
-    }
 
     private function handString(Hand $hand)
     {
@@ -155,63 +151,13 @@ class Game
         return $savedHandle;
     }
 
-    public function DealHand()
-    {
-        $cards = [];
-        for ($i = 0; $i < 2; $i++) {
-            $cards[] = $this->Shoe->dealCard();
-        }
-        return $cards;
-    }
 
 
-    public function Hit(Hand $hand)
-    {
-        $hand->getCard($this->Shoe->dealCard());
-        $this->checkHand($hand);
-    }
 
 
-    private function dealerTurn()
-    {
-        $this->checkHand($this->dealerHand);
-    }
-
-    private function endGame()
-    {
-        if (is_array($this->dealerHand->getHandValue()) || is_array($this->playerHand->getHandValue())) {
-            $this->softHandEndGame();
-        } elseif ($this->dealerHand->getHandValue() > $this->playerHand->getHandValue() && $this->dealerHand->getHandValue() <= 21) {
-            echo "\n";
-            echo $this->ShowDealerHand(0) . "\n";
-            $this->ShowPlayerHand();
-            echo "You Lose \n";
-        } elseif ($this->playerHand->getHandValue() > $this->playerHand->getHandValue() && $this->playerHand->getHandValue() <= 21) {
-            echo "\n";
-            echo $this->ShowDealerHand(0) . "\n";
-            echo "You win \n";
-        } elseif ($this->dealerHand->getHandValue() > 21) {
-            $this->Bust($this->dealerHand);
-        } elseif ($this->playerHand->getHandValue() > 21) {
-            $this->Bust($this->playerHand);
-        }
-        exit;
-    }
-
-    private function softHandEndGame()
-    {
-        if (!is_array($this->playerHand->getHandValue())) {
-            $dealerMax = max($this->dealerHand->getHandValue());
-            $dealerMin = min($this->dealerHand->getHandValue());
-            $playerValue = $this->playerHand->getHandValue();
-            if ($playerValue < $dealerMax || $dealerMin > $playerValue) {
-                echo "Dealer Wins with hand of \n";
-                $this->ShowDealerHand(0);
-            }
-        }
-    }
 
 
+    //maybe make a softhand class
 
 }
 

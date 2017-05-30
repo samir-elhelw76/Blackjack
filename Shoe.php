@@ -9,7 +9,7 @@ include_once 'Card.php';
 
 class Shoe
 {
-    private $cards = [];
+    public $cards = [];
     private $numDecks;
 
     //initializes empty array of cards and number of decks variable
