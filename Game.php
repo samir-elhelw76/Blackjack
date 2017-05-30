@@ -17,21 +17,18 @@ class Game
 
     public function __construct()
     {
-        if ($this->Intro() == False){
+        if ($this->Intro() == False) {
             exit;
-        }
-        else{
+        } else {
             $this->Shoe = new Shoe($this->constructShoe());
             $this->playerHand = new Hand($this->DealHand());
             $this->dealerHand = new Hand($this->DealHand());
-            $this->dealerShowedCards = [];
             echo "\n";
             echo "Game will now begin ...\n" . "\n";
             $this->gameStatus = True;
             $this->gameLoop();
         }
     }
-
 
 
     private function constructShoe()
@@ -47,13 +44,11 @@ class Game
         if (substr(strtolower($responseIntro), 0, 1) != 'y') {
             echo "Okay maybe next time";
             return False;
-        } elseif(substr(strtolower($responseIntro), 0, 1) != 'n') {
+        } elseif (substr(strtolower($responseIntro), 0, 1) != 'n') {
             return True;
-        }
-        else{
+        } else {
             echo "enter a valid response";
         }
-
     }
 
 
@@ -62,7 +57,8 @@ class Game
         while ($this->gameStatus == True) {
             $this->ShowPlayerHand();
             $this->checkHand($this->playerHand);
-            echo $this->ShowDealerHand(). " " . "\n";
+            echo $this->ShowDealerHand() . " " . "\n";
+            echo "Your current value is " . $this->playerHand->getHandValue()."\n";
             $playerHitResponse = $this->message("Will you hit or stay? Type 'hit' or 'stay': ");
             if (strtolower($playerHitResponse) != 'hit') {
                 $this->dealerTurn();
@@ -79,7 +75,7 @@ class Game
             $this->endgame();
         } elseif ($hand->getHandValue() > 21) {
             $this->Bust($hand);
-        } elseif($hand === $this->dealerHand && $hand->getHandValue()<17){
+        } elseif ($hand === $this->dealerHand && $hand->getHandValue() < 17) {
             $this->Hit($hand);
         }
     }
@@ -96,23 +92,24 @@ class Game
     private function ShowDealerHand()
     {
         echo "Dealer is showing";
-        for($i = 1; $i<=count($this->dealerHand->getHandString());$i++ ){
-            echo " ".$this->dealerHand->getHandString()[$i];
+        for ($i = 1; $i <= count($this->dealerHand->getHandString()); $i++) {
+            echo " " . $this->dealerHand->getHandString()[$i];
         }
 
     }
 
     private function Bust($hand)
     {
-        if($hand == $this->playerHand){
-            echo "You lose!"."\n";
+        if ($hand == $this->playerHand) {
+            echo "You Bust!" . "\n";
             exit;
-        }
-        else{
-            echo "The dealer has bust \n".$this->ShowDealerHand();
+        } else {
+            echo "The dealer has bust \n" . $this->ShowDealerHand();
+            echo "\n You Win";
             exit;
         }
     }
+
     private function handString(Hand $hand)
     {
         $handArray = $hand->getHandString();
@@ -148,6 +145,7 @@ class Game
     private function dealerTurn()
     {
         while ($this->dealerHand->getHandValue() < 17) {
+            echo ($this->dealerHand->getHandValue());
             $this->checkHand($this->dealerHand);
             if ($this->dealerHand->getHandValue() > 21) {
                 $this->Bust($this->dealerHand);
@@ -159,11 +157,13 @@ class Game
 
     private function endGame()
     {
-        if($this->dealerHand->getHandValue()>$this->playerHand->getHandValue()){
-            echo "The dealer's hand was ".$this->ShowDealerHand()."\n";
-            echo "You Bust \n";
-        }
-        else{
+        if ($this->dealerHand->getHandValue() > $this->playerHand->getHandValue() && $this->dealerHand <= 21) {
+            echo "\n";
+            echo $this->ShowDealerHand() . "\n";
+            echo "You Lose \n";
+        } else {
+            echo "\n";
+            echo $this->ShowDealerHand() . "\n";
             echo "You win \n";
         }
         exit;
