@@ -10,9 +10,9 @@ include_once 'Hand.php';
 
 class Game
 {
-    private $dealerHand;
     private $playerHand;
     private $gameStatus;
+    public $dealerHand;
     public $Shoe;
 
     public function __construct()
@@ -36,7 +36,7 @@ class Game
 
     private function constructShoe()
     {
-        $responseDecks = (int)$this->message("How many decks would you like to play with?");
+        $responseDecks = (int)$this->message("How many decks would you like to play with? ");
         return $responseDecks;
     }
 
@@ -47,8 +47,11 @@ class Game
         if (substr(strtolower($responseIntro), 0, 1) != 'y') {
             echo "Okay maybe next time";
             return False;
-        } else {
+        } elseif(substr(strtolower($responseIntro), 0, 1) != 'n') {
             return True;
+        }
+        else{
+            echo "enter a valid response";
         }
 
     }
@@ -65,15 +68,6 @@ class Game
                 $this->dealerTurn();
             } elseif (substr(strtolower($playerHitResponse), 0, 1) == 'h') {
                 $this->Hit($this->playerHand);
-                if ($this->checkHand($this->playerHand) == "Blackjack") {
-                    echo "You win!";
-                    $this->gameStatus = False;
-                    $this->endGame();
-                } elseif ($this->checkHand($this->playerHand) != "Bust") {
-                    $this->dealerTurn();
-                } else {
-                    $this->endGame();
-                }
             }
         }
     }
@@ -82,11 +76,11 @@ class Game
     private function checkHand(Hand $hand)
     {
         if ($hand->getHandValue() == 21) {
-            return "Blackjack";
+            $this->endgame();
         } elseif ($hand->getHandValue() > 21) {
-            return "Bust";
-        } elseif ($hand->getHandValue() < 21) {
-            return "Can hit again";
+            $this->Bust($hand);
+        } elseif($hand === $this->dealerHand && $hand->getHandValue()<17){
+            $this->Hit($hand);
         }
     }
 
@@ -108,7 +102,17 @@ class Game
 
     }
 
-
+    private function Bust($hand)
+    {
+        if($hand == $this->playerHand){
+            echo "You lose!"."\n";
+            exit;
+        }
+        else{
+            echo "The dealer has bust \n".$this->ShowDealerHand();
+            exit;
+        }
+    }
     private function handString(Hand $hand)
     {
         $handArray = $hand->getHandString();
@@ -134,50 +138,34 @@ class Game
         return $cards;
     }
 
-    //this method returns an array called 'cards' and removes the items in that array from the shoe
 
     public function Hit(Hand $hand)
     {
         $hand->getCard($this->Shoe->dealCard());
     }
 
-    //a method that adds another card to the player's hand
 
     private function dealerTurn()
     {
-        if ($this->checkHand($this->dealerHand) == "Blackjack") {
-            echo 'I win! Better luck next time.';
-            $this->endGame();
-        } elseif ($this->checkHand($this->dealerHand) == "Can hit again" && $this->dealerHand->getHandValue()<17) {
-            $this->Hit($this->dealerHand);
-            if($this->checkHand($this->dealerHand) == "Bust"){
-                echo "I bust, you win!";
+        while ($this->dealerHand->getHandValue() < 17) {
+            $this->checkHand($this->dealerHand);
+            if ($this->dealerHand->getHandValue() > 21) {
+                $this->Bust($this->dealerHand);
+            } else {
                 $this->endGame();
             }
-        }
-        elseif($this->checkHand($this->dealerHand) == "Bust"){
-            echo "\n"."I bust, you win!";
-        }
-        else{
-            echo "Your move"."\n";
         }
     }
 
     private function endGame()
     {
-        echo $this->ShowPlayerHand() ."Good Game!". "\n";
-        echo "See you next time!";
-        die();
-    }
-
-
-    public function getDealerHand()
-    {
-        return $this->dealerHand;
-    }
-
-    public function getPlayerHand()
-    {
-        return $this->playerHand;
+        if($this->dealerHand->getHandValue()>$this->playerHand->getHandValue()){
+            echo "The dealer's hand was ".$this->ShowDealerHand()."\n";
+            echo "You Bust \n";
+        }
+        else{
+            echo "You win \n";
+        }
+        exit;
     }
 }
