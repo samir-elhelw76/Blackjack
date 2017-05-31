@@ -23,7 +23,7 @@ class Card
         'K'=>10,
         'Q'=>10,
         'J'=>10,
-        'A'=>[11,1]
+        'A'=>1
     ];
     private static $suits = ['D','S','H','C'];
 
