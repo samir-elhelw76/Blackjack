@@ -13,7 +13,7 @@ include_once 'Dealer.php';
 class Player
 {
     private $money;
-    public $playerHand;
+    private $playerHand;
     private $playerName;
 
 

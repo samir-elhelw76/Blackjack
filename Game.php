@@ -59,46 +59,50 @@ class Game
             $this->ShowPlayerHand();
             $this->playerTurn();
         }
+        $this->endGame();
         exit;
-
     }
 
     private function playerTurn()
     {
-        if (is_array($this->player->getPlayerHand()->getHandValue())) {
+        $playerHand = $this->player->getPlayerHand();
+        $playerHandValue = $this->player->getPlayerHand()->getHandValue();
+        if (is_array($playerHandValue)) {
             echo "\nYour hand's value ";
-            foreach ($this->player->getPlayerHand()->getHandValue() as $value) {
-                echo $value."\n";
+            foreach ($playerHandValue as $value) {
+                echo $value . "\n";
             }
             if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
                 $this->dealer->bestHand();
+                $this->gameStatus = False;
             } else {
-                $this->dealer->Hit($this->player->playerHand);
-                if (!$this->player->getPlayerHand()->getHandValue()) {
-                    $this->Bust($this->player->getPlayerHand());
-                }
-                elseif($this->player->getPlayerHand()->getHandValue() == True){
+                $this->dealer->Hit($playerHand);
+                if ($playerHand->isBust()) {
+                    $this->Bust($playerHand);
+                } elseif ($playerHand->isBlackjack()) {
                     $this->playerWin();
                 }
             }
 
-
         } else {
-            echo "\nYour hand's value is " . $this->player->getPlayerHand()->getHandValue()."\n";
+            echo "\nYour hand's value is " . $playerHandValue."\n";
             if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
                 $this->dealer->bestHand();
+                $this->gameStatus = False;
             } else {
-                $this->dealer->Hit($this->player->playerHand);
-                if (!$this->player->getPlayerHand()->getHandValue()) {
-                    $this->Bust($this->player->getPlayerHand());
+                $this->dealer->Hit($playerHand);
+                if ($playerHand->isBust()) {
+                    $this->Bust($playerHand);
                 }
-                elseif ($this->player->getPlayerHand()->getHandValue() == 21){
+                elseif ($playerHand->isBlackjack()){
                     $this->playerWin();
                 }
 
             }
         }
     }
+
+
 
 
     private function Bust(Hand $hand)
@@ -119,6 +123,11 @@ class Game
         }
     }
 
+    private function playerWin()
+    {
+        echo "\nCongratulations! You win! With a hand of\n".$this->ShowPlayerHand();
+    }
+
 
     private function ShowDealerHand($start)
     {
@@ -129,6 +138,28 @@ class Game
 
     }
 
+
+    private function endGame()
+    {
+        if($this->getWinner() =='dealer'){
+            echo "\nThe dealer wins with a hand of\n"."\n"."Better Luck Next Time!";
+        }
+        elseif($this->getWinner() == 'player'){
+            $this->playerWin();
+        }
+
+    }
+
+
+    private function getWinner()
+    {
+        if($this->dealer->getDealerHand()->getHandValue() > $this->player->getPlayerHand()->getHandValue() && !$this->dealer->getDealerHand()->isBust()){
+            return "dealer";
+        }
+        else{
+            return "player";
+        }
+    }
 
     private function handString(Hand $hand)
     {

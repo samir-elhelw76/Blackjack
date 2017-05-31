@@ -31,60 +31,49 @@ class Hand
             }
             $handValues[0] += 10;
             foreach ($handValues as $handValue) {
-                if ($this->isBust($handValue)) {
+                if ($this->bustedAce($handValue)) {
                     unset($handValues[array_search($handValue, $handValues)]);
                 }
-                elseif($this->isBlackjack($handValue)){
-                    return true;
-                }
             }
-
-            if (count($handValues) == 0 || $this->isBust($handValues)) {
-                return False; //returns true, implying busted hand
-            } elseif (!$this->isBust($handValues)) {
-                return $handValues;
-            }
+            return $handValues;
         } else {
             foreach ($this->handCards as $card) {
                 $handValue += $card->getCardValue();
             }
-            if($this->isBlackjack($handValue)){
-                return true;
-            }
-             elseif($this->isBust($handValue)) {
-                return !$this->isBust($handValue);
-            }
-            elseif (!$this->isBust($handValue)) {
-                return $handValue;
-            }
         }
+        return $handValue;
     }
 
-    //sets the value in the hand equal to sum the value of the cards as they match with the cardValues array in Cards.php
+//sets the value in the hand equal to sum the value of the cards as they match with the cardValues array in Cards.php
 
 
     public
-    function isBust($value)
+    function isBust()
     {
+        $value = $this->getHandValue();
         if (!is_array($value)) {
             if ($value > 21) {
                 return True;
             } else {
                 return False;
             }
-        } elseif(is_array($value)) {
+        } elseif (is_array($value)) {
             $i = 0;
-            if ($value[$i] > 21 && $value[$i++] > 21) {
+            if ($value[$i] > 21 && $value[$i+1] > 21) {
                 return true;
-            } else {
+            } elseif(count($value) == 0) {
                 return false;
             }
         }
+        return false;
     }
 
 
-    private function isBlackjack($value)
+    public
+    function isBlackjack()
     {
+        $value = $this->getHandValue();
+
         if (!is_array($value)) {
             if ($value == 21) {
                 return True;
@@ -93,12 +82,31 @@ class Hand
             }
         } else {
             $i = 0;
-            if ($value[$i] == 21 || $value[$i++] == 21) {
+            if ($value[$i] == 21 || $value[$i+1] == 21) {
                 return true;
             } else {
                 return false;
             }
         }
+    }
+
+    public function bustedAce($value)
+    {
+        if (!is_array($value)) {
+            if ($value > 21) {
+                return True;
+            } else {
+                return False;
+            }
+        } elseif (is_array($value)) {
+            $i = 0;
+            if ($value[$i] > 21 && $value[$i+1] > 21) {
+                return true;
+            } elseif(count($value) == 0) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public

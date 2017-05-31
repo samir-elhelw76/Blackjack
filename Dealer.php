@@ -65,7 +65,7 @@ class Dealer
         elseif(is_array($this->dealerHand->getHandValue()) && max($this->dealerHand->getHandValue())<17){
             return true;
         }
-        elseif (!$this->dealerHand->getHandValue()){
+        elseif ($this->dealerHand->isBust()){
             return false;
         }
         return False;
