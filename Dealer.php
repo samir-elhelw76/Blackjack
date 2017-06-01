@@ -25,18 +25,17 @@ class Dealer
 
     public function bestHand()
     {
-        do  {
-            if (!is_array($this->dealerHand->getHandValue())) {
+        if ($this->dealerWantHit()) {
+            do {
+                if (!is_array($this->dealerHand->getHandValue())) {
+                    $this->Hit($this->dealerHand);
+                } elseif (is_array($this->dealerHand->getHandValue())) {
                     $this->Hit($this->dealerHand);
                 }
 
-             elseif (is_array($this->dealerHand->getHandValue())) {
-                    $this->Hit($this->dealerHand);
-                }
-
-            }
-        while($this->dealerWantHit());
+            } while ($this->dealerWantHit());
         }
+    }
 
     public function DealHand()
     {
@@ -59,7 +58,6 @@ class Dealer
 
     private function dealerWantHit()
     {
-        echo count($this->dealerHand->getHandValue());
     if ($this->dealerHand->isBust()){
             return false;
         }

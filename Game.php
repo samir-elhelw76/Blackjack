@@ -93,7 +93,7 @@ class Game
     private function Bust(Hand $hand)
     {
         if ($hand !== $this->dealer->getDealerHand()) {
-            echo "You lost!\n" . "The house wins with a hand of\n";
+            echo "You lost!\n" . "The house wins with a hand of ";
             $this->ShowDealerHand(0);
             $this->ShowPlayerHand();
             echo "\nBetter luck next time\n";
@@ -123,8 +123,8 @@ class Game
 
     private function ShowDealerHand($start)
     {
-        foreach ($this->handString($this->dealer->getDealerHand()) as $card) {
-            echo $card . " ";
+        for($i = $start; $i < count($this->handString($this->dealer->getDealerHand())); $i++){
+            echo $this->handString($this->dealer->getDealerHand())[$i]. " ";
         }
     }
 
@@ -132,7 +132,7 @@ class Game
     private function endGame()
     {
         if ($this->getWinner() == 'dealer') {
-            echo "\nThe dealer wins with a hand of\n";
+            echo "\nThe dealer wins with a hand of ";
             $this->ShowDealerHand(0);
             echo "\nBetter luck next time\n";
 
@@ -174,8 +174,6 @@ class Game
         return $savedHandle;
     }
 
-
-    //maybe make a softhand class
-
 }
 
+new Game(1);
