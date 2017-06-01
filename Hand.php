@@ -21,14 +21,15 @@ class Hand
         $handValue = 0;
         $handValues = [];
         if ($this->hasAce()) {
+            $aceCount = $this->AceCount();
             foreach ($this->handCards as $card) {
                 if ($card->getCardFace() != 'A') {
                     $handValue += $card->getCardValue();
                 }
             }
-            for ($i = 0; $i < 2; $i++) {
-                $handValues[$i] = $handValue + 1;
-            }
+                for ($i = 0; $i < 2; $i++) {
+                    $handValues[$i] = $handValue + $aceCount;
+                }
             $handValues[0] += 10;
             foreach ($handValues as $handValue) {
                 if ($this->bustedAce($handValue)) {
@@ -59,10 +60,10 @@ class Hand
             }
         } elseif (is_array($value)) {
             $i = 0;
-            if ($value[$i] > 21 && $value[$i+1] > 21) {
-                return true;
-            } elseif(count($value) == 0) {
+            if (count($value) == 0) {
                 return false;
+            } elseif ($value[$i] > 21 && $value[$i + 1] > 21) {
+                return true;
             }
         }
         return false;
@@ -82,7 +83,7 @@ class Hand
             }
         } else {
             $i = 0;
-            if ($value[$i] == 21 || $value[$i+1] == 21) {
+            if ($value[$i] == 21 || $value[$i + 1] == 21) {
                 return true;
             } else {
                 return false;
@@ -100,9 +101,9 @@ class Hand
             }
         } elseif (is_array($value)) {
             $i = 0;
-            if ($value[$i] > 21 && $value[$i+1] > 21) {
+            if ($value[$i] > 21 && $value[$i + 1] > 21) {
                 return true;
-            } elseif(count($value) == 0) {
+            } elseif (count($value) == 0) {
                 return false;
             }
         }
@@ -128,6 +129,17 @@ class Hand
             }
         }
         return False;
+    }
+
+    private function AceCount()
+    {
+        $aceCount = 0;
+        foreach ($this->handCards as $card) {
+            if ($card->getCardFace() == 'A') {
+                $aceCount = $aceCount + 1;
+            }
+        }
+        return $aceCount;
     }
 
     public

@@ -55,6 +55,7 @@ class Game
     private function gameLoop()
     {
         while ($this->gameStatus == True) {
+            echo "Dealer is showing\n";
             $this->ShowDealerHand(1);
             $this->ShowPlayerHand();
             $this->playerTurn();
@@ -68,11 +69,13 @@ class Game
         $playerHand = $this->player->getPlayerHand();
         $playerHandValue = $this->player->getPlayerHand()->getHandValue();
         if (is_array($playerHandValue)) {
-            echo "\nYour hand's value ";
+            echo "\nYour hand's value is ";
             foreach ($playerHandValue as $value) {
                 echo $value . "\n";
             }
-            if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
+            if ($playerHand->isBlackjack()) {
+                $this->playerWin();
+            } elseif (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
                 $this->dealer->bestHand();
                 $this->gameStatus = False;
             } else {
@@ -85,7 +88,7 @@ class Game
             }
 
         } else {
-            echo "\nYour hand's value is " . $playerHandValue."\n";
+            echo "\nYour hand's value is " . $playerHandValue . "\n";
             if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
                 $this->dealer->bestHand();
                 $this->gameStatus = False;
@@ -93,58 +96,61 @@ class Game
                 $this->dealer->Hit($playerHand);
                 if ($playerHand->isBust()) {
                     $this->Bust($playerHand);
-                }
-                elseif ($playerHand->isBlackjack()){
+                } elseif ($playerHand->isBlackjack()) {
                     $this->playerWin();
                 }
-
             }
         }
     }
 
 
-
-
     private function Bust(Hand $hand)
     {
-        if($hand !== $this->dealer->getDealerHand()){
-            echo "You lost!\n"."The house wins with a hand of\n".$this->handString($this->dealer->getDealerHand());
+        if ($hand !== $this->dealer->getDealerHand()) {
+            echo "You lost!\n" . "The house wins with a hand of\n";
+            $this->ShowDealerHand(0);
+            $this->ShowPlayerHand();
+            echo "\nBetter luck next time\n";
+        } else {
+            echo "You win!\n" . "Your hand was\n" . $this->ShowPlayerHand();
         }
-        else{
-            echo "You win!\n"."Your hand was\n".$this->ShowPlayerHand();
-        }
-        $this->gameStatus = False;
+        exit;
     }
+
     private function ShowPlayerHand()
     {
         echo "\nYour hand is\n";
         foreach ($this->handString($this->player->getPlayerHand()) as $card) {
-            echo $card." ";
+            echo $card . " ";
         }
     }
 
     private function playerWin()
     {
-        echo "\nCongratulations! You win! With a hand of\n".$this->ShowPlayerHand();
+        $this->ShowPlayerHand();
+        echo "\nCongratulations! You win!";
+        echo "\nThe dealer had\n";
+        $this->ShowDealerHand(0);
+        exit;
     }
 
 
     private function ShowDealerHand($start)
     {
-        echo "\nDealer is showing ";
-        for ($i = $start; $i <= count($this->dealer->getDealerHand()->getHandString()); $i++) {
-            echo " " . $this->dealer->getDealerHand()->getHandString()[$i];
+        foreach ($this->handString($this->dealer->getDealerHand()) as $card) {
+            echo $card . " ";
         }
-
     }
 
 
     private function endGame()
     {
-        if($this->getWinner() =='dealer'){
-            echo "\nThe dealer wins with a hand of\n"."\n"."Better Luck Next Time!";
-        }
-        elseif($this->getWinner() == 'player'){
+        if ($this->getWinner() == 'dealer') {
+            echo "\nThe dealer wins with a hand of\n";
+            $this->ShowDealerHand(0);
+            echo "\nBetter luck next time\n";
+
+        } elseif ($this->getWinner() == 'player') {
             $this->playerWin();
         }
 
@@ -153,13 +159,15 @@ class Game
 
     private function getWinner()
     {
-        if($this->dealer->getDealerHand()->getHandValue() > $this->player->getPlayerHand()->getHandValue() && !$this->dealer->getDealerHand()->isBust()){
+        $dealerValue = $this->dealer->getDealerHand()->getHandValue();
+        $playerValue = $this->player->getPlayerHand()->getHandValue();
+        if ($dealerValue > $playerValue || max($dealerValue) > $playerValue && !$this->dealer->getDealerHand()->isBust()) {
             return "dealer";
-        }
-        else{
+        } else {
             return "player";
         }
     }
+
 
     private function handString(Hand $hand)
     {
