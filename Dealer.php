@@ -20,8 +20,7 @@ class Dealer
     public function __construct($numDecks)
     {
         $this->Shoe = new Shoe($numDecks);
-        //$this->dealerHand = new Hand ($this->DealHand());
-        $this->dealerHand = new Hand([new Card('D', 'A'), new Card('S', 'A')]);
+        $this->dealerHand = new Hand ($this->DealHand());
     }
 
     public function bestHand()
@@ -60,11 +59,15 @@ class Dealer
 
     private function dealerWantHit()
     {
+        echo count($this->dealerHand->getHandValue());
     if ($this->dealerHand->isBust()){
             return false;
         }
+        elseif(count($this->dealerHand->getHandValue()) == 0 && is_array($this->dealerHand->getHandValue())){
+        return false;
+        }
 
-        if($this->dealerHand->getHandValue()<17){
+        elseif($this->dealerHand->getHandValue()<17){
             return True;
         }
         elseif(is_array($this->dealerHand->getHandValue()) && max($this->dealerHand->getHandValue())<17){

@@ -61,7 +61,7 @@ class Hand
         } elseif (is_array($value)) {
             $i = 0;
             if (count($value) == 0) {
-                return false;
+                return true;
             } elseif ($value[$i] > 21 && $value[$i + 1] > 21) {
                 return true;
             }

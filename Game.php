@@ -55,7 +55,7 @@ class Game
     private function gameLoop()
     {
         while ($this->gameStatus == True) {
-            echo "Dealer is showing\n";
+            echo "Dealer is showing ";
             $this->ShowDealerHand(1);
             $this->ShowPlayerHand();
             $this->playerTurn();
@@ -73,23 +73,10 @@ class Game
             foreach ($playerHandValue as $value) {
                 echo $value . "\n";
             }
-            if ($playerHand->isBlackjack()) {
-                $this->playerWin();
-            } elseif (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
-                $this->dealer->bestHand();
-                $this->gameStatus = False;
-            } else {
-                $this->dealer->Hit($playerHand);
-                if ($playerHand->isBust()) {
-                    $this->Bust($playerHand);
-                } elseif ($playerHand->isBlackjack()) {
-                    $this->playerWin();
-                }
-            }
-
         } else {
             echo "\nYour hand's value is " . $playerHandValue . "\n";
-            if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
+        }
+        if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
                 $this->dealer->bestHand();
                 $this->gameStatus = False;
             } else {
@@ -101,7 +88,6 @@ class Game
                 }
             }
         }
-    }
 
 
     private function Bust(Hand $hand)
@@ -112,14 +98,14 @@ class Game
             $this->ShowPlayerHand();
             echo "\nBetter luck next time\n";
         } else {
-            echo "You win!\n" . "Your hand was\n" . $this->ShowPlayerHand();
+            echo "You win!\n" . "Your hand was " . $this->ShowPlayerHand();
         }
         exit;
     }
 
     private function ShowPlayerHand()
     {
-        echo "\nYour hand is\n";
+        echo "\nYour hand is ";
         foreach ($this->handString($this->player->getPlayerHand()) as $card) {
             echo $card . " ";
         }
@@ -129,7 +115,7 @@ class Game
     {
         $this->ShowPlayerHand();
         echo "\nCongratulations! You win!";
-        echo "\nThe dealer had\n";
+        echo "\nThe dealer had ";
         $this->ShowDealerHand(0);
         exit;
     }
@@ -161,9 +147,12 @@ class Game
     {
         $dealerValue = $this->dealer->getDealerHand()->getHandValue();
         $playerValue = $this->player->getPlayerHand()->getHandValue();
-        if ($dealerValue > $playerValue || max($dealerValue) > $playerValue && !$this->dealer->getDealerHand()->isBust()) {
+        if ($this->dealer->getDealerHand()->isBust()) {
+            return "player";
+        } elseif($dealerValue > $playerValue || max($dealerValue) > $playerValue) {
             return "dealer";
-        } else {
+        }
+        else{
             return "player";
         }
     }
