@@ -53,6 +53,11 @@ class Shoe
         $card = array_shift($this->cards);
         return $card;
     }
+
+    public function getNumDecks()
+    {
+        return $this->numDecks;
+    }
 //removes a dealt card from the array
     public function getCards()
     {

@@ -15,7 +15,7 @@ include_once 'Hand.php';
 class Dealer
 {
     private $dealerHand;
-    public $Shoe;
+    private $Shoe;
 
     public function __construct($numDecks)
     {
@@ -54,6 +54,11 @@ class Dealer
     public function getDealerHand()
     {
         return $this->dealerHand;
+    }
+
+    public function getNumberDecks()
+    {
+        return $this->Shoe->getNumDecks();
     }
 
     private function dealerWantHit()

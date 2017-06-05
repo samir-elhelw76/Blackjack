@@ -12,9 +12,11 @@ include_once 'Player.php';
 
 class Game
 {
-    private $gameStatus;
     public $dealer;
     public $player;
+    private $moveCount;
+    private $gameStatus;
+    private $db;
 
     public function __construct()
     {
@@ -23,6 +25,9 @@ class Game
         } else {
             $this->dealer = new Dealer($this->constructShoe());
             $this->player = new Player($this->dealer->DealHand());
+            $this->moveCount = 0;
+            $this->db = new \PDO("mysql:host=localhost;dbname=Blackjack", "root", null);
+            $this->db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             echo "\n";
             echo "Game will now begin ...\n\n";
             $this->gameStatus = True;
@@ -30,17 +35,9 @@ class Game
         }
     }
 
-
-    private function constructShoe()
-    {
-        $responseDecks = (int)$this->message("How many decks would you like to play with? ");
-        return $responseDecks;
-    }
-
-
     private function Intro()
     {
-        $responseIntro = $this->message("Would you like to play a game of blackjack? Type 'yes' or 'no':" . " ");
+        $responseIntro = $this->message("Hello, would you like to play a game of blackjack? Type 'yes' or 'no':" . " ");
         if (substr(strtolower($responseIntro), 0, 1) != 'y') {
             echo "Okay maybe next time";
             return False;
@@ -51,17 +48,55 @@ class Game
         }
     }
 
+    private function message($message)
+    {
+        echo $message;
+        $handle = fopen("php://stdin", "r");
+        $savedHandle = fgets($handle);
+        fclose($handle);
+        $savedHandle = trim($savedHandle);
+        return $savedHandle;
+    }
+
+    private function constructShoe()
+    {
+        $responseDecks = (int)$this->message("How many decks would you like to play with? ");
+        return $responseDecks;
+    }
 
     private function gameLoop()
     {
         while ($this->gameStatus == True) {
             echo "Dealer is showing ";
-            $this->ShowDealerHand(1);
-            $this->ShowPlayerHand();
+            $this->showDealerHand(1);
+            $this->showPlayerHand();
             $this->playerTurn();
         }
         $this->endGame();
+        $this->writePlayerData();
+        $this->writeGameData();
         exit;
+    }
+
+    private function showDealerHand($start)
+    {
+        for ($i = $start; $i < count($this->handString($this->dealer->getDealerHand())); $i++) {
+            echo $this->handString($this->dealer->getDealerHand())[$i] . " ";
+        }
+    }
+
+    private function handString(Hand $hand)
+    {
+        $handArray = $hand->getHandString();
+        return $handArray;
+    }
+
+    private function showPlayerHand()
+    {
+        echo "\nYour hand is ";
+        foreach ($this->handString($this->player->getPlayerHand()) as $card) {
+            echo $card . " ";
+        }
     }
 
     private function playerTurn()
@@ -77,63 +112,61 @@ class Game
             echo "\nYour hand's value is " . $playerHandValue . "\n";
         }
         if (substr(strtolower($this->player->wantHit()), 0, 1) != 'h') {
-                $this->dealer->bestHand();
-                $this->gameStatus = False;
-            } else {
-                $this->dealer->Hit($playerHand);
-                if ($playerHand->isBust()) {
-                    $this->Bust($playerHand);
-                } elseif ($playerHand->isBlackjack()) {
-                    $this->playerWin();
-                }
+            $this->dealer->bestHand();
+            $this->gameStatus = False;
+        } else {
+            $this->dealer->Hit($playerHand);
+            if ($playerHand->isBust()) {
+                $this->Bust($playerHand);
+            } elseif ($playerHand->isBlackjack()) {
+                $this->playerWin();
             }
+            $this->moveCount += 1;
         }
-
+    }
 
     private function Bust(Hand $hand)
     {
         if ($hand !== $this->dealer->getDealerHand()) {
             echo "You lost!\n" . "The house wins with a hand of ";
-            $this->ShowDealerHand(0);
-            $this->ShowPlayerHand();
+            $this->showDealerHand(0);
+            $this->showPlayerHand();
             echo "\nBetter luck next time\n";
         } else {
-            echo "You win!\n" . "Your hand was " . $this->ShowPlayerHand();
+            echo "You win!\n" . "Your hand was " . $this->showPlayerHand();
         }
+        $this->writePlayerData();
+        $this->writeGameData();
         exit;
     }
 
-    private function ShowPlayerHand()
+    private function writePlayerData()
     {
-        echo "\nYour hand is ";
-        foreach ($this->handString($this->player->getPlayerHand()) as $card) {
-            echo $card . " ";
+        try {
+            $this->db->beginTransaction();
+            $sql = "INSERT INTO players(player_first_name) VALUE (:playerName)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':playerName' => $this->player->getPlayerName()]);
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
     }
 
     private function playerWin()
     {
-        $this->ShowPlayerHand();
+        $this->showPlayerHand();
         echo "\nCongratulations! You win!";
         echo "\nThe dealer had ";
-        $this->ShowDealerHand(0);
-        exit;
+        $this->showDealerHand(0);
     }
-
-
-    private function ShowDealerHand($start)
-    {
-        for($i = $start; $i < count($this->handString($this->dealer->getDealerHand())); $i++){
-            echo $this->handString($this->dealer->getDealerHand())[$i]. " ";
-        }
-    }
-
 
     private function endGame()
     {
         if ($this->getWinner() == 'dealer') {
             echo "\nThe dealer wins with a hand of ";
-            $this->ShowDealerHand(0);
+            $this->showDealerHand(0);
             echo "\nBetter luck next time\n";
 
         } elseif ($this->getWinner() == 'player') {
@@ -142,36 +175,50 @@ class Game
 
     }
 
-
     private function getWinner()
     {
         $dealerValue = $this->dealer->getDealerHand()->getHandValue();
         $playerValue = $this->player->getPlayerHand()->getHandValue();
         if ($this->dealer->getDealerHand()->isBust()) {
             return "player";
-        } elseif($dealerValue > $playerValue || max($dealerValue) > $playerValue) {
+        } elseif ($dealerValue > $playerValue || max($dealerValue) > $playerValue) {
             return "dealer";
-        }
-        else{
+        } else {
             return "player";
         }
     }
 
-
-    private function handString(Hand $hand)
+    private function writeGameData()
     {
-        $handArray = $hand->getHandString();
-        return $handArray;
-    }
+        try {
+            $this->db->beginTransaction();
+            $sql = ("INSERT INTO game
+(
+player_moves,
+number_of_decks,
+dealer_hand_value,
+player_hand_value,
+VALUES
+(:moveCount,
+:numberOfDecks,
+:dealerHandValue,
+:playerHandValue,
+))");       $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':moveCount' => $this->moveCount,
+                ':numberOfDecks' => $this->dealer->getNumberDecks(),
+                'dealerHandValue' => $this->dealer->getDealerHand()->getHandValue(),
+                'playerHandValue' => $this->player->getPlayerHand()->getHandValue(),
 
-    private function message($message)
-    {
-        echo $message;
-        $handle = fopen("php://stdin", "r");
-        $savedHandle = fgets($handle);
-        fclose($handle);
-        $savedHandle = trim($savedHandle);
-        return $savedHandle;
+            ]);
+            $this->db->commit();
+
+
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+
     }
 
 }

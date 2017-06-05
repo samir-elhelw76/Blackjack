@@ -14,12 +14,13 @@ class Player
 {
     private $money;
     private $playerHand;
-    private $playerName;
+    public $playerName;
 
 
     public function __construct($cards)
     {
         $this->playerHand = new Hand($cards);
+        $this->setPlayerName();
         $this->money = 300;
     }
 
@@ -32,8 +33,22 @@ class Player
 
    public function wantHit()
    {
-       return $this->message( "Would you like to 'hit' or 'stay'?");
+       return $this->message( "Would you like to 'hit' or 'stay' ".$this->playerName. "?: ");
    }
+
+    /**
+     * @return bool|string
+     */
+    public function getPlayerName()
+    {
+        return $this->playerName;
+    }
+
+    public function setPlayerName()
+    {
+        $this->playerName = $this->message("What is your name?: ");
+    }
+
 
     private function message($message)
     {
