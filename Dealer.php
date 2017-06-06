@@ -66,10 +66,6 @@ class Dealer
     if ($this->dealerHand->isBust()){
             return false;
         }
-        elseif(count($this->dealerHand->getHandValue()) == 0 && is_array($this->dealerHand->getHandValue())){
-        return false;
-        }
-
         elseif($this->dealerHand->getHandValue()<17){
             return True;
         }

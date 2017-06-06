@@ -16,105 +16,52 @@ class Hand
     }
 
 
-
-
-
     public function getHandValue()
     {
-        $handValue = 0;
-        $handValues = [];
-        if ($this->hasAce()) {
-            $aceCount = $this->AceCount();
-            foreach ($this->handCards as $card) {
-                if ($card->getCardFace() != 'A') {
-                    $handValue += $card->getCardValue();
-                }
-            }
-                for ($i = 0; $i < 2; $i++) {
-                    $handValues[$i] = $handValue + $aceCount;
-                }
-            $handValues[0] += 10;
-            foreach ($handValues as $handValue) {
-                if ($this->bustedAce($handValue)) {
-                    unset($handValues[array_search($handValue, $handValues)]);
-                }
-            }
-            return $handValues;
-        } else {
-            foreach ($this->handCards as $card) {
-                $handValue += $card->getCardValue();
-            }
+        $value = 0;
+        $aceFlag = $this->hasAce();
+        foreach ($this->handCards as $card) {
+            $value += $card->getCardValue();
         }
-        return $handValue;
+        if ($value == 21 || $value > 21) {
+            return $value;
+        }
+         elseif ($aceFlag) {
+            if ($value += 10 == 21) {
+                return $value += 10;
+            }
+            elseif ($value += 10 < 21) {
+               return [$value+=10, $value];
+            }
+            else{
+                return $value;
+            }
+
+        }
+        return $value;
     }
 
 //sets the value in the hand equal to sum the value of the cards as they match with the cardValues array in Cards.php
 
 
-    public
-    function isBust()
+    public function isBust()
     {
         $value = $this->getHandValue();
-        if (!is_array($value)) {
-            if ($value > 21) {
-                return True;
-            } else {
-                return False;
-            }
-        } elseif (is_array($value)) {
-            $i = 0;
-            if (count($value) == 0) {
-                return true;
-            } elseif ($value[$i] > 21 && $value[$i + 1] > 21) {
-                return true;
-            }
-        }
-        return false;
+        return ($value > 21);
     }
 
 
-    public
-    function isBlackjack()
+    /**
+     *
+     */
+    public function isBlackjack()
     {
         $value = $this->getHandValue();
-
-        if (!is_array($value)) {
-            if ($value == 21) {
-                return True;
-            } else {
-                return False;
-            }
-        } else {
-            $i = 0;
-            if ($value[$i] == 21 || $value[$i + 1] == 21) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+        $cardCount = count($this->handCards);
+        return ($value == 21 && $cardCount == 2);
     }
 
-    public function bustedAce($value)
-    {
-        if (!is_array($value)) {
-            if ($value > 21) {
-                return True;
-            } else {
-                return False;
-            }
-        } elseif (is_array($value)) {
-            $i = 0;
-            if ($value[$i] > 21 && $value[$i + 1] > 21) {
-                return true;
-            } elseif (count($value) == 0) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public
-    function getHandString()
+    public function getHandString()
     {
         $strHand = [];
         foreach ($this->handCards as $card) {
@@ -123,8 +70,9 @@ class Hand
         return $strHand;
     }
 
-    private
-    function hasAce()
+
+
+    private function hasAce()
     {
         foreach ($this->handCards as $card) {
             if ($card->getCardFace() == 'A') {
@@ -134,25 +82,12 @@ class Hand
         return False;
     }
 
-    private function AceCount()
-    {
-        $aceCount = 0;
-        foreach ($this->handCards as $card) {
-            if ($card->getCardFace() == 'A') {
-                $aceCount = $aceCount + 1;
-            }
-        }
-        return $aceCount;
-    }
-
-    public
-    function getHandCards()
+    public function getHandCards()
     {
         return $this->handCards;
     }
 
-    public
-    function getCard($card)
+    public function getCard($card)
     {
         return $this->handCards[] = $card;
     }

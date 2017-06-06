@@ -103,7 +103,11 @@ class Game
     {
         $playerHand = $this->player->getPlayerHand();
         $playerHandValue = $this->player->getPlayerHand()->getHandValue();
-        if (is_array($playerHandValue)) {
+        if ($playerHand->isBlackjack()) {
+            $this->Blackjack($playerHand);
+        } elseif ($this->dealer->getDealerHand()->isBlackjack()) {
+            $this->Blackjack($this->dealer->getDealerHand());
+        } elseif (is_array($playerHandValue)) {
             echo "\nYour hand's value is ";
             foreach ($playerHandValue as $value) {
                 echo $value . "\n";
@@ -118,11 +122,26 @@ class Game
             $this->dealer->Hit($playerHand);
             if ($playerHand->isBust()) {
                 $this->Bust($playerHand);
-            } elseif ($playerHand->isBlackjack()) {
-                $this->playerWin();
             }
-            $this->moveCount += 1;
         }
+        $this->moveCount++;
+    }
+
+
+    private function Blackjack(Hand $hand)
+    {
+        if ($hand !== $this->dealer->getDealerHand()) {
+            $this->showPlayerHand();
+            echo "\nYou have Blackjack, Congratulations\n";
+        } else {
+            echo "\n The dealer has ";
+            $this->showDealerHand(0);
+            echo "\nThe dealer has Blackjack, you lost\n";
+        }
+        echo "Have a nice day " . $this->player->getPlayerName() . "\n";
+        $this->writeGameData();
+        $this->writePlayerData();
+        exit;
     }
 
     private function Bust(Hand $hand)
@@ -138,28 +157,6 @@ class Game
         $this->writePlayerData();
         $this->writeGameData();
         exit;
-    }
-
-    private function writePlayerData()
-    {
-        try {
-            $this->db->beginTransaction();
-            $sql = "INSERT INTO players(player_first_name) VALUE (:playerName)";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([':playerName' => $this->player->getPlayerName()]);
-            $this->db->commit();
-        } catch (\Exception $e) {
-            $this->db->rollback();
-            throw $e;
-        }
-    }
-
-    private function playerWin()
-    {
-        $this->showPlayerHand();
-        echo "\nCongratulations! You win!";
-        echo "\nThe dealer had ";
-        $this->showDealerHand(0);
     }
 
     private function endGame()
@@ -181,10 +178,36 @@ class Game
         $playerValue = $this->player->getPlayerHand()->getHandValue();
         if ($this->dealer->getDealerHand()->isBust()) {
             return "player";
-        } elseif ($dealerValue > $playerValue || max($dealerValue) > $playerValue) {
+        } elseif ($dealerValue > $playerValue) {
             return "dealer";
+        } elseif (is_array($dealerValue)) {
+            if (max($dealerValue) > $playerValue) {
+                return true;
+            }
         } else {
             return "player";
+        }
+    }
+
+    private function playerWin()
+    {
+        $this->showPlayerHand();
+        echo "\nCongratulations! You win!";
+        echo "\nThe dealer had ";
+        $this->showDealerHand(0);
+    }
+
+    private function writePlayerData()
+    {
+        try {
+            $this->db->beginTransaction();
+            $sql = "INSERT INTO players(player_first_name) VALUE (:playerName)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':playerName' => $this->player->getPlayerName()]);
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            throw $e;
         }
     }
 
@@ -192,8 +215,7 @@ class Game
     {
         try {
             $this->db->beginTransaction();
-            $sql = ("INSERT INTO game
-(
+            $sql = ("INSERT INTO game(
 player_moves,
 number_of_decks,
 dealer_hand_value,
@@ -202,15 +224,14 @@ VALUES
 (:moveCount,
 :numberOfDecks,
 :dealerHandValue,
-:playerHandValue,
-))");       $stmt = $this->db->prepare($sql);
+:playerHandValue
+)");
+            $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 ':moveCount' => $this->moveCount,
                 ':numberOfDecks' => $this->dealer->getNumberDecks(),
-                'dealerHandValue' => $this->dealer->getDealerHand()->getHandValue(),
-                'playerHandValue' => $this->player->getPlayerHand()->getHandValue(),
-
-            ]);
+                ':dealerHandValue' => $this->dealer->getDealerHand()->getHandValue(),
+                ':playerHandValue' => $this->player->getPlayerHand()->getHandValue()]);
             $this->db->commit();
 
 
@@ -222,5 +243,8 @@ VALUES
     }
 
 }
+
+
+//TODO integrate push
 
 new Game(1);
