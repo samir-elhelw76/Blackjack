@@ -15,6 +15,7 @@ class Game
     public $dealer;
     public $player;
     private $moveCount;
+    private $playerId;
     private $gameStatus;
     private $db;
 
@@ -194,44 +195,73 @@ class Game
         $this->showPlayerHand();
         echo "\nCongratulations! You win!";
         echo "\nThe dealer had ";
-        $this->showDealerHand(0);
+        $this->showDealerHand(0)."\n";
     }
 
-    private function writePlayerData()
+    private function playerNameExists()
     {
-        try {
-            $this->db->beginTransaction();
-            $sql = "INSERT INTO players(player_first_name) VALUE (:playerName)";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([':playerName' => $this->player->getPlayerName()]);
-            $this->db->commit();
-        } catch (\Exception $e) {
-            $this->db->rollback();
+        try{
+            $sql = "SELECT DISTINCT player_id, player_first_name FROM players";
+            foreach($this->db->query($sql) as $row){
+                if($row['player_first_name'] === $this->player->getPlayerName()){
+                    $this->playerId = $row['player_id'];
+                    return true;
+                }
+            } ;
+
+        }catch(\Exception $e){
+            $this->db->rollBack();
             throw $e;
         }
     }
 
+    private function writePlayerData()
+    {
+        if (!$this->playerNameExists()) {
+            try {
+                $this->db->beginTransaction();
+                $sql = "INSERT INTO players(player_first_name) VALUE (:playerName)";
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([':playerName' => $this->player->getPlayerName()]);
+                $this->playerId = $this->db->lastInsertId();
+                $this->db->commit();
+            } catch (\Exception $e) {
+                $this->db->rollback();
+                throw $e;
+            }
+        }
+    }
+
+
+
     private function writeGameData()
     {
+        $dealerHandValue = $this->dealer->getDealerHand()->getHandValue();
+        $playerHandValue = $this->player->getPlayerHand()->getHandValue();
+
         try {
             $this->db->beginTransaction();
             $sql = ("INSERT INTO game(
+game_player_id,
 player_moves,
 number_of_decks,
 dealer_hand_value,
-player_hand_value,
+player_hand_value)
 VALUES
-(:moveCount,
+(:gamePlayerId,
+:moveCount,
 :numberOfDecks,
 :dealerHandValue,
 :playerHandValue
 )");
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
+                ':gamePlayerId'=> $this->playerId,
                 ':moveCount' => $this->moveCount,
                 ':numberOfDecks' => $this->dealer->getNumberDecks(),
-                ':dealerHandValue' => $this->dealer->getDealerHand()->getHandValue(),
-                ':playerHandValue' => $this->player->getPlayerHand()->getHandValue()]);
+                ':dealerHandValue' => (is_array($dealerHandValue))? max($dealerHandValue) : $dealerHandValue,
+                ':playerHandValue' => (is_array($playerHandValue))? max($playerHandValue) : $playerHandValue
+            ]);
             $this->db->commit();
 
 
@@ -245,6 +275,6 @@ VALUES
 }
 
 
-//TODO integrate push
+//TODO integrate push a hand
 
 new Game(1);

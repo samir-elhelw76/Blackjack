@@ -19,26 +19,28 @@ class Hand
     public function getHandValue()
     {
         $value = 0;
-        $aceFlag = $this->hasAce();
         foreach ($this->handCards as $card) {
             $value += $card->getCardValue();
         }
         if ($value == 21 || $value > 21) {
             return $value;
         }
-         elseif ($aceFlag) {
-            if ($value += 10 == 21) {
-                return $value += 10;
+         elseif ($this->hasAce()) {
+            $value2 = $value + 10;
+            if ($value2 == 21) {
+                return $value2;
             }
-            elseif ($value += 10 < 21) {
-               return [$value+=10, $value];
+            elseif ($value2 < 21) {
+               return [$value2, $value];
             }
-            else{
+            elseif($value2>21){
                 return $value;
             }
 
         }
-        return $value;
+        else{
+            return $value;
+        }
     }
 
 //sets the value in the hand equal to sum the value of the cards as they match with the cardValues array in Cards.php

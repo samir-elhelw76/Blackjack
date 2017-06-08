@@ -21,7 +21,7 @@ class Player
     {
         $this->playerHand = new Hand($cards);
         $this->setPlayerName();
-        $this->money = 300;
+        $this->money = 100;
     }
 
 
